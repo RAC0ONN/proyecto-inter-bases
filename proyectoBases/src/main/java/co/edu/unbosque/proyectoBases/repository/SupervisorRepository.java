@@ -35,4 +35,8 @@ public interface SupervisorRepository extends JpaRepository<Supervisor, Integer>
 	
 	@Query(value = "SELECT * FROM SUPERVISOR WHERE nombre_usuario = ?1", nativeQuery = true)
 	Optional<Supervisor> buscarPorUsuario(String nombreUsuario);
+	
+	/*@Query(value = "SELECT * FROM SUPERVISOR WHERE id_almacen = ?1 LIMIT 1", nativeQuery = true)
+	Optional<Supervisor> obtenerPorAlmacen(int idAlmacen); */
+
 }

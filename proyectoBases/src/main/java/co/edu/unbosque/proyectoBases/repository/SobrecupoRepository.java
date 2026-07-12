@@ -24,9 +24,14 @@ public interface SobrecupoRepository extends JpaRepository<Sobrecupo, Integer> {
 			VALUES (?1, ?2, ?3, ?4)
 			""", nativeQuery = true)
 	void crearSobrecupo(int id, double porcentajeSobrecupo, double valorMaximo, int idPareja);
-
+	
 	@Modifying
 	@Transactional
 	@Query(value = "DELETE FROM SOBRECUPO WHERE id_sobrecupo = ?1", nativeQuery = true)
 	void eliminarSobrecupo(int idSobrecupo);
+	
+	/*	@Modifying
+	@Transactional
+	@Query(value = "UPDATE SOBRECUPO SET estado_sobrecupo = ?1 WHERE id_sobrecupo = ?2", nativeQuery = true)
+	void actualizarEstado(String estadoSobrecupo, int idSobrecupo);*/
 }
