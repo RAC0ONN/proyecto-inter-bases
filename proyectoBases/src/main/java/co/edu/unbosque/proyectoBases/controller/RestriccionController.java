@@ -44,6 +44,11 @@ public class RestriccionController {
 	public ResponseEntity<RestriccionDTO> obtenerRestriccion(@RequestParam int idRestriccion) {
 		return ResponseEntity.ok(restriccionService.obtenerPorId(idRestriccion));
 	}
+	
+	@GetMapping(path = { "/ObtenerPorPareja" })
+	public ResponseEntity<List<RestriccionDTO>> obtenerPorPareja(@RequestParam int idPareja) {
+		return ResponseEntity.ok(restriccionService.obtenerPorPareja(idPareja));
+	}
 
 	@DeleteMapping(path = { "/BorrarRestriccion" })
 	public ResponseEntity<Map<String, Object>> borrarRestriccion(@RequestParam int idRestriccion) {

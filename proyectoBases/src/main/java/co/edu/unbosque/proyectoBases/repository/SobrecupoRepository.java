@@ -17,6 +17,10 @@ public interface SobrecupoRepository extends JpaRepository<Sobrecupo, Integer> {
 	@Query(value = "SELECT * FROM SOBRECUPO WHERE id_pareja = ?1", nativeQuery = true)
 	ArrayList<Sobrecupo> obtenerPorPareja(int idPareja);
 
+	
+	@Query(value = "SELECT COALESCE(SUM(valor_maximo), 0) FROM SOBRECUPO WHERE id_pareja = ?1", nativeQuery = true)
+	double obtenerValorMaximoTotalPorPareja(int idPareja);
+	
 	@Modifying
 	@Transactional
 	@Query(value = """

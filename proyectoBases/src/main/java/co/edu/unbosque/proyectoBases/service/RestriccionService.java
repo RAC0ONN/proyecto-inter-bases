@@ -47,6 +47,17 @@ public class RestriccionService {
 		}
 		restriccionRepository.eliminarRestriccion(idRestriccion);
 	}
+	
+	public ArrayList<RestriccionDTO> obtenerPorPareja(int idPareja) {
+		List<Restriccion> entidades = restriccionRepository.obtenerPorPareja(idPareja);
+		ArrayList<RestriccionDTO> resultado = new ArrayList<>();
+		if (entidades != null) {
+			for (Restriccion r : entidades) {
+				resultado.add(mapear(r));
+			}
+		}
+		return resultado;
+	}
 
 	private RestriccionDTO mapear(Restriccion r) {
 		RestriccionDTO dto = new RestriccionDTO();
