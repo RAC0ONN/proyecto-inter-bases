@@ -17,12 +17,15 @@ public interface CompraRepository extends JpaRepository<Compra, Integer> {
 
 	@Query(value = "SELECT * FROM compra", nativeQuery = true)
 	List<Compra> obtenerTodas();
-	
+
 	@Query(value = "SELECT * FROM COMPRA WHERE id_compra = ?1", nativeQuery = true)
 	Compra obtenerPorId(int idCompra);
 
 	@Query(value = "SELECT * FROM COMPRA WHERE id_pareja = ?1", nativeQuery = true)
 	ArrayList<Compra> obtenerPorPareja(int idPareja);
+
+	@Query(value = "SELECT COALESCE(SUM(monto), 0) FROM COMPRA WHERE id_pareja = ?1", nativeQuery = true)
+	double obtenerMontoTotalPorPareja(int idPareja);
 
 	@Modifying
 	@Transactional

@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import co.edu.unbosque.proyectoBases.dto.ParejaDTO;
+import co.edu.unbosque.proyectoBases.entity.Cliente;
 import co.edu.unbosque.proyectoBases.entity.Pareja;
+import co.edu.unbosque.proyectoBases.exceptions.RecursoLimiteCupoExcedidoException;
 import co.edu.unbosque.proyectoBases.exceptions.RecursoNoExistenteException;
 import co.edu.unbosque.proyectoBases.exceptions.RecursoSinDatosException;
+import co.edu.unbosque.proyectoBases.repository.ClienteRepository;
 import co.edu.unbosque.proyectoBases.repository.ParejaRepository;
 
 @Service
@@ -16,7 +20,25 @@ public class ParejaService {
 	@Autowired
 	private ParejaRepository parejaRepository;
 
+	@Autowired
+	private ClienteRepository clienteRepository;
+
 	public void crear(ParejaDTO dto) {
+		Cliente cliente = clienteRepository.obtenerPorId(dto.getIdCliente());
+		if (cliente == null) {
+			throw new RecursoNoExistenteException("No existe un cliente con ese id, no se puede asignar la pareja");
+		}
+
+		double cupoActualAsignado = parejaRepository.obtenerCupoAsignadoTotal(dto.getIdCliente());
+		double nuevoTotal = cupoActualAsignado + dto.getCupoAsignado();
+		if (nuevoTotal > cliente.getCupoTotal()) {
+			double disponible = cliente.getCupoTotal() - cupoActualAsignado;
+			throw new RecursoLimiteCupoExcedidoException(String.format(
+					"El cupo asignado (%.2f) supera el cupo disponible del cliente (%.2f). "
+							+ "Cupo total: %.2f, ya asignado a otras parejas: %.2f",
+					dto.getCupoAsignado(), disponible, cliente.getCupoTotal(), cupoActualAsignado));
+		}
+
 		parejaRepository.crearPareja(dto.getPrimerNombre(), dto.getSegundoNombre(), dto.getPrimerApellido(),
 				dto.getSegundoApellido(), dto.getNombreUsuario(), dto.getContraseniaUsuario(), dto.getCupoAsignado(),
 				dto.getCorreoElectronico(), dto.getIdCliente());
@@ -26,6 +48,22 @@ public class ParejaService {
 		if (parejaRepository.obtenerPorId(dto.getIdPareja()) == null) {
 			throw new RecursoNoExistenteException("Error, la pareja no existe");
 		}
+		Cliente cliente = clienteRepository.obtenerPorId(dto.getIdCliente());
+		if (cliente == null) {
+			throw new RecursoNoExistenteException("No existe un cliente con ese id, no se puede asignar la pareja");
+		}
+
+		double cupoDeOtrasParejas = parejaRepository.obtenerCupoAsignadoTotalExcluyendo(dto.getIdCliente(),
+				dto.getIdPareja());
+		double nuevoTotal = cupoDeOtrasParejas + dto.getCupoAsignado();
+		if (nuevoTotal > cliente.getCupoTotal()) {
+			double disponible = cliente.getCupoTotal() - cupoDeOtrasParejas;
+			throw new RecursoLimiteCupoExcedidoException(String.format(
+					"El cupo asignado (%.2f) supera el cupo disponible del cliente (%.2f). "
+							+ "Cupo total: %.2f, ya asignado a otras parejas: %.2f",
+					dto.getCupoAsignado(), disponible, cliente.getCupoTotal(), cupoDeOtrasParejas));
+		}
+
 		parejaRepository.actualizarPareja(dto.getPrimerNombre(), dto.getSegundoNombre(), dto.getPrimerApellido(),
 				dto.getSegundoApellido(), dto.getNombreUsuario(), dto.getContraseniaUsuario(), dto.getCupoAsignado(),
 				dto.getCorreoElectronico(), dto.getIdCliente(), dto.getIdPareja());
