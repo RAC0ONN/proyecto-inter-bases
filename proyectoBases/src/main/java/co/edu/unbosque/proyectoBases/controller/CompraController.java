@@ -41,6 +41,11 @@ public class CompraController {
 		return ResponseEntity.ok(compraService.obtenerTodas());
 	}
 
+	@GetMapping(path = { "/ObtenerPorPareja" })
+	public ResponseEntity<List<CompraDTO>> obtenerPorPareja(@RequestParam int idPareja) {
+		return ResponseEntity.ok(compraService.obtenerPorPareja(idPareja));
+	}
+ 
 	@GetMapping(path = { "/ObtenerCompra" })
 	public ResponseEntity<CompraDTO> obtenerCompra(@RequestParam int idCompra) {
 		return ResponseEntity.ok(compraService.obtenerPorId(idCompra));

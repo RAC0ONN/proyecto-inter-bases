@@ -70,6 +70,17 @@ public class CompraService {
 		return siguienteId;
 	}
 
+	public ArrayList<CompraDTO> obtenerPorPareja(int idPareja) {
+		List<Compra> entidades = compraRepository.obtenerPorPareja(idPareja);
+		ArrayList<CompraDTO> resultado = new ArrayList<>();
+		if (entidades != null) {
+			for (Compra c : entidades) {
+				resultado.add(mapear(c));
+			}
+		}
+		return resultado;
+	}
+	
 	public ArrayList<CompraDTO> obtenerTodas() {
 		List<Compra> entidades = compraRepository.obtenerTodas();
 		if (entidades == null || entidades.isEmpty()) {
