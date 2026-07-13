@@ -80,7 +80,7 @@ public class CompraService {
 		}
 		return resultado;
 	}
-	
+
 	public ArrayList<CompraDTO> obtenerTodas() {
 		List<Compra> entidades = compraRepository.obtenerTodas();
 		if (entidades == null || entidades.isEmpty()) {
@@ -161,9 +161,9 @@ public class CompraService {
 			return;
 		}
 
-		throw new RecursoCupoInsuficienteException(
-				String.format("La compra no puede realizarse porque el cupo disponible es de %.2f y el sobrecupo disponible es de %.2f. El valor de la compra es %.2f.",
-						Math.max(cupoDisponible, 0), sobrecupoDisponible, monto));
+		throw new RecursoCupoInsuficienteException(String.format(
+				"La compra no puede realizarse porque el cupo disponible es de %.2f y el sobrecupo disponible es de %.2f. El valor de la compra es %.2f.",
+				Math.max(cupoDisponible, 0), sobrecupoDisponible, monto));
 	}
 
 }
