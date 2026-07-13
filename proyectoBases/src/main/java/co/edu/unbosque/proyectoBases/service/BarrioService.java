@@ -11,8 +11,7 @@ import co.edu.unbosque.proyectoBases.exceptions.RecursoSinDatosException;
 import co.edu.unbosque.proyectoBases.repository.BarrioRepository;
 
 @Service
-public class BarrioService {
-
+public class BarrioService { 
 	@Autowired
 	private BarrioRepository barrioRepository;
 
@@ -41,5 +40,9 @@ public class BarrioService {
 		dto.setIdBarrio(b.getIdBarrio());
 		dto.setNombre(b.getNombre());
 		return dto;
+
 	}
 }
+
+
+
