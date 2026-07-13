@@ -77,4 +77,19 @@ public class ParejaController {
 		body.put("status", HttpStatus.OK.value());
 		return ResponseEntity.status(HttpStatus.OK).body(body);
 	}
+	@PostMapping(path = { "/Autenticar" }, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Map<String, Object>> autenticarPareja(@RequestBody Map<String, String> credenciales) {
+	    String username = credenciales.get("username");
+	    String password = credenciales.get("password");
+	    
+	    ParejaDTO dto = parejaService.autenticar(username, password);
+	    
+	    Map<String, Object> body = new HashMap<>();
+	    body.put("message", "Autenticación exitosa");
+	    body.put("status", HttpStatus.OK.value());
+	    body.put("rol", "pareja");
+	    body.put("datos", dto);
+	    
+	    return ResponseEntity.ok(body);
+	}
 }

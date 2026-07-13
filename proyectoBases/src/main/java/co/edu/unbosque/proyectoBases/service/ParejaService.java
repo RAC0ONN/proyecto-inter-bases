@@ -127,4 +127,23 @@ public class ParejaService {
 		}
 		return dto;
 	}
+	
+	public ParejaDTO autenticar(String nombreUsuario, String contrasenia) {
+	    List<Pareja> entidades = parejaRepository.obtenerTodas();
+	    if (entidades == null || entidades.isEmpty()) {
+	        throw new RecursoSinDatosException("No hay parejas registradas ");
+	    }
+	    
+	    for (Pareja p : entidades) {
+	        if (p.getNombreUsuario() != null && p.getNombreUsuario().equals(nombreUsuario)) {
+	            if (p.getContraseniaUsuario() != null && p.getContraseniaUsuario().equals(contrasenia)) {
+	                return mapear(p);
+	            } else {
+	                throw new RecursoNoExistenteException("Contraseña incorrecta");
+	            }
+	        }
+	    }
+	    throw new RecursoNoExistenteException("El usuario de la pareja no existe");
+	}
+	
 }
