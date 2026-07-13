@@ -30,6 +30,7 @@ public class AlmacenServiceTest {
 		almacenRepository = Mockito.mock(AlmacenRepository.class);
 		almacenService = new AlmacenService();
 		ReflectionTestUtils.setField(almacenService, "almacenRepository", almacenRepository);
+		
 	}
 
 	@Test
