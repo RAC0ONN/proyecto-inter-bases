@@ -27,6 +27,9 @@ public interface CompraRepository extends JpaRepository<Compra, Integer> {
 	@Query(value = "SELECT COALESCE(SUM(monto), 0) FROM COMPRA WHERE id_pareja = ?1", nativeQuery = true)
 	double obtenerMontoTotalPorPareja(int idPareja);
 
+	@Query(value = "SELECT COALESCE(MAX(id_compra), 0) + 1 FROM COMPRA", nativeQuery = true)
+	int obtenerSiguienteId();
+
 	@Modifying
 	@Transactional
 	@Query(value = """

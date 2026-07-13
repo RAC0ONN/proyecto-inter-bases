@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,52 +12,161 @@ import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import co.edu.unbosque.proyectoBases.dto.SobrecupoDTO;
+import co.edu.unbosque.proyectoBases.entity.Almacen;
 import co.edu.unbosque.proyectoBases.entity.Pareja;
 import co.edu.unbosque.proyectoBases.entity.Sobrecupo;
+import co.edu.unbosque.proyectoBases.entity.Supervisor;
+import co.edu.unbosque.proyectoBases.exceptions.RecursoEstadoInvalidoException;
 import co.edu.unbosque.proyectoBases.exceptions.RecursoNoExistenteException;
 import co.edu.unbosque.proyectoBases.exceptions.RecursoSinDatosException;
+import co.edu.unbosque.proyectoBases.repository.AlmacenRepository;
+import co.edu.unbosque.proyectoBases.repository.ParejaRepository;
 import co.edu.unbosque.proyectoBases.repository.SobrecupoRepository;
+import co.edu.unbosque.proyectoBases.repository.SupervisorRepository;
 import co.edu.unbosque.proyectoBases.service.SobrecupoService;
 
 public class SobrecupoServiceTest {
 
 	private SobrecupoRepository sobrecupoRepository;
+	private ParejaRepository parejaRepository;
+	private AlmacenRepository almacenRepository;
+	private SupervisorRepository supervisorRepository;
 	private SobrecupoService sobrecupoService;
 
 	@BeforeEach
 	public void setUp() {
-
 		sobrecupoRepository = Mockito.mock(SobrecupoRepository.class);
+		parejaRepository = Mockito.mock(ParejaRepository.class);
+		almacenRepository = Mockito.mock(AlmacenRepository.class);
+		supervisorRepository = Mockito.mock(SupervisorRepository.class);
+
 		sobrecupoService = new SobrecupoService();
 		ReflectionTestUtils.setField(sobrecupoService, "sobrecupoRepository", sobrecupoRepository);
-		
+		ReflectionTestUtils.setField(sobrecupoService, "parejaRepository", parejaRepository);
+		ReflectionTestUtils.setField(sobrecupoService, "almacenRepository", almacenRepository);
+		ReflectionTestUtils.setField(sobrecupoService, "supervisorRepository", supervisorRepository);
 	}
 
 	@Test
-	public void crearSobrecupo() {
+	public void solicitar_DeberiaCrearSobrecupoPendienteConElSupervisorDelAlmacen() {
+		Pareja pareja = new Pareja();
+		pareja.setIdPareja(3);
+
+		Almacen almacen = new Almacen();
+		almacen.setIdAlmacen(1);
+
+		Supervisor supervisor = new Supervisor();
+		supervisor.setIdSupervisor(7);
 
 		SobrecupoDTO dto = new SobrecupoDTO();
-		dto.setIdSobrecupo(1);
-		dto.setPorcentajeSobrecupo(20.0);
-		dto.setValorMaximo(500000.0);
 		dto.setIdPareja(3);
+		dto.setIdAlmacen(1);
+		dto.setMontoSobrecupo(200000);
 
-		sobrecupoService.crear(dto);
+		when(parejaRepository.obtenerPorId(3)).thenReturn(pareja);
+		when(almacenRepository.obtenerPorId(1)).thenReturn(almacen);
+		when(supervisorRepository.obtenerPorAlmacen(1)).thenReturn(Optional.of(supervisor));
+		when(sobrecupoRepository.obtenerSiguienteId()).thenReturn(1);
 
-		verify(sobrecupoRepository, times(1)).crearSobrecupo(1, 20.0, 500000.0, 3);
+		sobrecupoService.solicitar(dto);
+
+		verify(sobrecupoRepository, times(1)).crearSobrecupo(1, 7, 3, SobrecupoService.PENDIENTE, 200000);
+	}
+
+	@Test
+	public void solicitar_DeberiaLanzarExcepcionSiElAlmacenNoTieneSupervisor() {
+		Pareja pareja = new Pareja();
+		pareja.setIdPareja(3);
+		Almacen almacen = new Almacen();
+		almacen.setIdAlmacen(1);
+
+		SobrecupoDTO dto = new SobrecupoDTO();
+		dto.setIdPareja(3);
+		dto.setIdAlmacen(1);
+		dto.setMontoSobrecupo(200000);
+
+		when(parejaRepository.obtenerPorId(3)).thenReturn(pareja);
+		when(almacenRepository.obtenerPorId(1)).thenReturn(almacen);
+		when(supervisorRepository.obtenerPorAlmacen(1)).thenReturn(Optional.empty());
+
+		assertThrows(RecursoNoExistenteException.class, () -> sobrecupoService.solicitar(dto));
+	}
+
+	@Test
+	public void escalarACliente_DeberiaPasarAEsperandoClienteSiEscalaEsTrue() {
+		Sobrecupo sobrecupo = new Sobrecupo();
+		sobrecupo.setIdSobrecupo(1);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.PENDIENTE);
+
+		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(sobrecupo);
+
+		sobrecupoService.escalarACliente(1, true);
+
+		verify(sobrecupoRepository, times(1)).actualizarEstado(SobrecupoService.ESPERANDO_CLIENTE, 1);
+	}
+
+	@Test
+	public void escalarACliente_DeberiaRechazarDirectoSiEscalaEsFalse() {
+		Sobrecupo sobrecupo = new Sobrecupo();
+		sobrecupo.setIdSobrecupo(1);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.PENDIENTE);
+
+		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(sobrecupo);
+
+		sobrecupoService.escalarACliente(1, false);
+
+		verify(sobrecupoRepository, times(1)).actualizarEstado(SobrecupoService.RECHAZADO, 1);
+	}
+
+	@Test
+	public void escalarACliente_DeberiaLanzarExcepcionSiYaFueProcesada() {
+		Sobrecupo sobrecupo = new Sobrecupo();
+		sobrecupo.setIdSobrecupo(1);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.APROBADO);
+
+		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(sobrecupo);
+
+		assertThrows(RecursoEstadoInvalidoException.class, () -> sobrecupoService.escalarACliente(1, true));
+	}
+
+	@Test
+	public void responderCliente_DeberiaAprobarSiEstaEsperandoCliente() {
+		Sobrecupo sobrecupo = new Sobrecupo();
+		sobrecupo.setIdSobrecupo(1);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.ESPERANDO_CLIENTE);
+
+		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(sobrecupo);
+
+		sobrecupoService.responderCliente(1, true);
+
+		verify(sobrecupoRepository, times(1)).actualizarEstado(SobrecupoService.APROBADO, 1);
+	}
+
+	@Test
+	public void responderCliente_DeberiaLanzarExcepcionSiNoEstaEsperandoCliente() {
+		Sobrecupo sobrecupo = new Sobrecupo();
+		sobrecupo.setIdSobrecupo(1);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.PENDIENTE);
+
+		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(sobrecupo);
+
+		assertThrows(RecursoEstadoInvalidoException.class, () -> sobrecupoService.responderCliente(1, true));
 	}
 
 	@Test
 	public void obtenerTodas() {
-
 		Pareja pareja = new Pareja();
 		pareja.setIdPareja(3);
 
+		Supervisor supervisor = new Supervisor();
+		supervisor.setIdSupervisor(7);
+
 		Sobrecupo sobrecupo = new Sobrecupo();
 		sobrecupo.setIdSobrecupo(1);
-		sobrecupo.setPorcentajeSobrecupo(15.0);
-		sobrecupo.setValorMaximo(300000.0);
+		sobrecupo.setEstadoSobrecupo(SobrecupoService.PENDIENTE);
+		sobrecupo.setMontoSobrecupo(300000);
 		sobrecupo.setPareja(pareja);
+		sobrecupo.setSupervisor(supervisor);
 
 		ArrayList<Sobrecupo> lista = new ArrayList<>();
 		lista.add(sobrecupo);
@@ -67,86 +177,49 @@ public class SobrecupoServiceTest {
 
 		assertEquals(1, resultado.size());
 		assertEquals(1, resultado.get(0).getIdSobrecupo());
-		assertEquals(15.0, resultado.get(0).getPorcentajeSobrecupo());
-		assertEquals(300000.0, resultado.get(0).getValorMaximo());
+		assertEquals(SobrecupoService.PENDIENTE, resultado.get(0).getEstadoSobrecupo());
+		assertEquals(300000.0, resultado.get(0).getMontoSobrecupo());
 		assertEquals(3, resultado.get(0).getIdPareja());
+		assertEquals(7, resultado.get(0).getIdSupervisor());
 	}
 
 	@Test
 	public void obtenerTodas_SinDatos() {
-
 		when(sobrecupoRepository.findAll()).thenReturn(new ArrayList<>());
 
 		assertThrows(RecursoSinDatosException.class, () -> sobrecupoService.obtenerTodas());
 	}
 
 	@Test
-	public void obtenerPorId() {
-
-		Pareja pareja = new Pareja();
-		pareja.setIdPareja(8);
-
-		Sobrecupo sobrecupo = new Sobrecupo();
-		sobrecupo.setIdSobrecupo(5);
-		sobrecupo.setPorcentajeSobrecupo(10.0);
-		sobrecupo.setValorMaximo(150000.0);
-		sobrecupo.setPareja(pareja);
-
-		when(sobrecupoRepository.obtenerPorId(5)).thenReturn(sobrecupo);
-
-		SobrecupoDTO dto = sobrecupoService.obtenerPorId(5);
-
-		assertEquals(5, dto.getIdSobrecupo());
-		assertEquals(10.0, dto.getPorcentajeSobrecupo());
-		assertEquals(150000.0, dto.getValorMaximo());
-		assertEquals(8, dto.getIdPareja());
-	}
-
-	@Test
 	public void obtenerPorId_NoExiste() {
-
 		when(sobrecupoRepository.obtenerPorId(100)).thenReturn(null);
 
 		assertThrows(RecursoNoExistenteException.class, () -> sobrecupoService.obtenerPorId(100));
 	}
 
 	@Test
-	public void obtenerPorPareja() {
-
-		Pareja pareja = new Pareja();
-		pareja.setIdPareja(4);
-
-		Sobrecupo sobrecupo = new Sobrecupo();
-		sobrecupo.setIdSobrecupo(2);
-		sobrecupo.setPorcentajeSobrecupo(25.0);
-		sobrecupo.setValorMaximo(600000.0);
-		sobrecupo.setPareja(pareja);
-
-		ArrayList<Sobrecupo> lista = new ArrayList<>();
-		lista.add(sobrecupo);
-
-		when(sobrecupoRepository.obtenerPorPareja(4)).thenReturn(lista);
-
-		ArrayList<SobrecupoDTO> resultado = sobrecupoService.obtenerPorPareja(4);
-
-		assertEquals(1, resultado.size());
-		assertEquals(2, resultado.get(0).getIdSobrecupo());
-		assertEquals(25.0, resultado.get(0).getPorcentajeSobrecupo());
-		assertEquals(600000.0, resultado.get(0).getValorMaximo());
-		assertEquals(4, resultado.get(0).getIdPareja());
-	}
-
-	@Test
 	public void obtenerPorPareja_SinDatos() {
-
 		when(sobrecupoRepository.obtenerPorPareja(4)).thenReturn(new ArrayList<>());
 
 		assertThrows(RecursoSinDatosException.class, () -> sobrecupoService.obtenerPorPareja(4));
 	}
 
 	@Test
-	public void eliminarSobrecupo() {
+	public void obtenerPorSupervisor_SinDatos() {
+		when(sobrecupoRepository.obtenerPorSupervisor(7)).thenReturn(new ArrayList<>());
 
+		assertThrows(RecursoSinDatosException.class, () -> sobrecupoService.obtenerPorSupervisor(7));
+	}
+
+	@Test
+	public void obtenerPorCliente_SinDatos() {
+		when(sobrecupoRepository.obtenerPorCliente(1)).thenReturn(new ArrayList<>());
+
+		assertThrows(RecursoSinDatosException.class, () -> sobrecupoService.obtenerPorCliente(1));
+	}
+
+	@Test
+	public void eliminarSobrecupo() {
 		Sobrecupo sobrecupo = new Sobrecupo();
 		sobrecupo.setIdSobrecupo(1);
 
@@ -159,11 +232,9 @@ public class SobrecupoServiceTest {
 
 	@Test
 	public void eliminarSobrecupo_NoExiste() {
-
 		when(sobrecupoRepository.obtenerPorId(1)).thenReturn(null);
 
 		assertThrows(RecursoNoExistenteException.class, () -> sobrecupoService.eliminar(1));
-
 	}
 
 }

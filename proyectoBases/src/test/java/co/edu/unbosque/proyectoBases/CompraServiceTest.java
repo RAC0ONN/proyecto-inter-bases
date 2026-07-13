@@ -66,22 +66,25 @@ public class CompraServiceTest {
 
 		when(parejaRepository.obtenerPorId(1)).thenReturn(pareja);
 		when(almacenRepository.obtenerPorId(2)).thenReturn(almacen);
-
 		when(restriccionRepository.obtenerPorPareja(1)).thenReturn(new ArrayList<>());
 		when(compraRepository.obtenerMontoTotalPorPareja(1)).thenReturn(1000.0);
+		when(sobrecupoRepository.obtenerMontoAprobadoTotalPorPareja(1)).thenReturn(0.0);
+		when(compraRepository.obtenerSiguienteId()).thenReturn(10);
 
 		CompraDTO dto = new CompraDTO();
-		dto.setIdCompra(10);
 		dto.setIdPareja(1);
 		dto.setIdAlmacen(2);
 		dto.setMonto(500);
 		dto.setFecha(LocalDate.of(2025, 6, 10));
 		dto.setHora(LocalTime.of(10, 0));
 
-		compraService.crear(dto);
+		int id = compraService.crear(dto);
 
-		verify(compraRepository, times(1)).crearCompra(eq(10), any(LocalTime.class), eq(500.0), any(LocalDate.class),
-				eq(1), eq(2));
+		assertEquals(10, id);
+
+		verify(compraRepository).obtenerSiguienteId();
+		verify(compraRepository).crearCompra(eq(10), any(LocalTime.class), eq(500.0), any(LocalDate.class), eq(1),
+				eq(2));
 	}
 
 	@Test
@@ -137,7 +140,7 @@ public class CompraServiceTest {
 		dto.setIdPareja(1);
 		dto.setIdAlmacen(2);
 		dto.setMonto(100);
-		dto.setFecha(LocalDate.of(2025, 6, 10)); // martes
+		dto.setFecha(LocalDate.of(2025, 6, 10));
 		dto.setHora(LocalTime.of(9, 0));
 
 		assertThrows(RecursoCompraRestringidaException.class, () -> compraService.crear(dto));
@@ -155,12 +158,9 @@ public class CompraServiceTest {
 
 		when(parejaRepository.obtenerPorId(1)).thenReturn(pareja);
 		when(almacenRepository.obtenerPorId(2)).thenReturn(almacen);
-
 		when(restriccionRepository.obtenerPorPareja(1)).thenReturn(new ArrayList<>());
-
 		when(compraRepository.obtenerMontoTotalPorPareja(1)).thenReturn(900.0);
-
-		when(sobrecupoRepository.obtenerValorMaximoTotalPorPareja(1)).thenReturn(50.0);
+		when(sobrecupoRepository.obtenerMontoAprobadoTotalPorPareja(1)).thenReturn(50.0);
 
 		CompraDTO dto = new CompraDTO();
 		dto.setIdPareja(1);
@@ -182,25 +182,25 @@ public class CompraServiceTest {
 
 		when(parejaRepository.obtenerPorId(1)).thenReturn(pareja);
 		when(almacenRepository.obtenerPorId(2)).thenReturn(almacen);
-
 		when(restriccionRepository.obtenerPorPareja(1)).thenReturn(new ArrayList<>());
-
 		when(compraRepository.obtenerMontoTotalPorPareja(1)).thenReturn(950.0);
-
-		when(sobrecupoRepository.obtenerValorMaximoTotalPorPareja(1)).thenReturn(500.0);
+		when(sobrecupoRepository.obtenerMontoAprobadoTotalPorPareja(1)).thenReturn(500.0);
+		when(compraRepository.obtenerSiguienteId()).thenReturn(20);
 
 		CompraDTO dto = new CompraDTO();
-		dto.setIdCompra(20);
 		dto.setIdPareja(1);
 		dto.setIdAlmacen(2);
 		dto.setMonto(300);
 		dto.setFecha(LocalDate.of(2025, 6, 11));
 		dto.setHora(LocalTime.of(14, 0));
 
-		compraService.crear(dto);
+		int id = compraService.crear(dto);
 
-		verify(compraRepository, times(1)).crearCompra(eq(20), any(LocalTime.class), eq(300.0), any(LocalDate.class),
-				eq(1), eq(2));
+		assertEquals(20, id);
+
+		verify(compraRepository).obtenerSiguienteId();
+		verify(compraRepository).crearCompra(eq(20), any(LocalTime.class), eq(300.0), any(LocalDate.class), eq(1),
+				eq(2));
 	}
 
 	@Test
@@ -297,4 +297,5 @@ public class CompraServiceTest {
 
 		assertThrows(RecursoNoExistenteException.class, () -> compraService.eliminar(1));
 	}
+
 }

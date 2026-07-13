@@ -5,19 +5,31 @@ import java.util.Objects;
 public class SobrecupoDTO {
 
 	private int idSobrecupo;
-	private double porcentajeSobrecupo;
-	private double valorMaximo;
+	private int idSupervisor;
 	private int idPareja;
+	private int idAlmacen;
+	private String estadoSobrecupo;
+	private double montoSobrecupo;
 
 	public SobrecupoDTO() {
 	}
 
-	public SobrecupoDTO(int idSobrecupo, double porcentajeSobrecupo, double valorMaximo, int idPareja) {
+	public SobrecupoDTO(int idSobrecupo, int idSupervisor, int idPareja, String estadoSobrecupo,
+			double montoSobrecupo) {
 		super();
 		this.idSobrecupo = idSobrecupo;
-		this.porcentajeSobrecupo = porcentajeSobrecupo;
-		this.valorMaximo = valorMaximo;
+		this.idSupervisor = idSupervisor;
 		this.idPareja = idPareja;
+		this.estadoSobrecupo = estadoSobrecupo;
+		this.montoSobrecupo = montoSobrecupo;
+	}
+
+	public int getIdAlmacen() {
+		return idAlmacen;
+	}
+
+	public void setIdAlmacen(int idAlmacen) {
+		this.idAlmacen = idAlmacen;
 	}
 
 	public int getIdSobrecupo() {
@@ -28,20 +40,12 @@ public class SobrecupoDTO {
 		this.idSobrecupo = idSobrecupo;
 	}
 
-	public double getPorcentajeSobrecupo() {
-		return porcentajeSobrecupo;
+	public int getIdSupervisor() {
+		return idSupervisor;
 	}
 
-	public void setPorcentajeSobrecupo(double porcentajeSobrecupo) {
-		this.porcentajeSobrecupo = porcentajeSobrecupo;
-	}
-
-	public double getValorMaximo() {
-		return valorMaximo;
-	}
-
-	public void setValorMaximo(double valorMaximo) {
-		this.valorMaximo = valorMaximo;
+	public void setIdSupervisor(int idSupervisor) {
+		this.idSupervisor = idSupervisor;
 	}
 
 	public int getIdPareja() {
@@ -52,9 +56,25 @@ public class SobrecupoDTO {
 		this.idPareja = idPareja;
 	}
 
+	public String getEstadoSobrecupo() {
+		return estadoSobrecupo;
+	}
+
+	public void setEstadoSobrecupo(String estadoSobrecupo) {
+		this.estadoSobrecupo = estadoSobrecupo;
+	}
+
+	public double getMontoSobrecupo() {
+		return montoSobrecupo;
+	}
+
+	public void setMontoSobrecupo(double montoSobrecupo) {
+		this.montoSobrecupo = montoSobrecupo;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(idPareja, idSobrecupo, porcentajeSobrecupo, valorMaximo);
+		return Objects.hash(estadoSobrecupo, idAlmacen, idPareja, idSobrecupo, idSupervisor, montoSobrecupo);
 	}
 
 	@Override
@@ -66,9 +86,9 @@ public class SobrecupoDTO {
 		if (getClass() != obj.getClass())
 			return false;
 		SobrecupoDTO other = (SobrecupoDTO) obj;
-		return idPareja == other.idPareja && idSobrecupo == other.idSobrecupo
-				&& Double.doubleToLongBits(porcentajeSobrecupo) == Double.doubleToLongBits(other.porcentajeSobrecupo)
-				&& Double.doubleToLongBits(valorMaximo) == Double.doubleToLongBits(other.valorMaximo);
+		return Objects.equals(estadoSobrecupo, other.estadoSobrecupo) && idAlmacen == other.idAlmacen
+				&& idPareja == other.idPareja && idSobrecupo == other.idSobrecupo && idSupervisor == other.idSupervisor
+				&& Double.doubleToLongBits(montoSobrecupo) == Double.doubleToLongBits(other.montoSobrecupo);
 	}
 
 }

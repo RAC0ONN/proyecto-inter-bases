@@ -28,10 +28,11 @@ public class CompraController {
 
 	@PostMapping(path = { "/CrearCompra" }, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Map<String, Object>> crearCompra(@RequestBody CompraDTO dto) {
-		compraService.crear(dto);
+		int idCompra = compraService.crear(dto);
 		Map<String, Object> body = new HashMap<>();
 		body.put("message", "Compra creada");
 		body.put("status", HttpStatus.CREATED.value());
+		body.put("idCompra", idCompra);
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 

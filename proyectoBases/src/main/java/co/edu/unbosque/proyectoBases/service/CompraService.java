@@ -47,7 +47,7 @@ public class CompraService {
 			DayOfWeek.WEDNESDAY, "MIERCOLES", DayOfWeek.THURSDAY, "JUEVES", DayOfWeek.FRIDAY, "VIERNES",
 			DayOfWeek.SATURDAY, "SABADO", DayOfWeek.SUNDAY, "DOMINGO");
 
-	public void crear(CompraDTO dto) {
+	public int crear(CompraDTO dto) {
 		Pareja pareja = parejaRepository.obtenerPorId(dto.getIdPareja());
 		if (pareja == null) {
 			throw new RecursoNoExistenteException("No existe una pareja con ese id, no se puede registrar la compra");
@@ -64,8 +64,10 @@ public class CompraService {
 		validarRestriccionHoraria(dto.getIdPareja(), fechaFinal, horaFinal);
 		validarCupoDisponible(pareja, dto.getMonto());
 
-		compraRepository.crearCompra(dto.getIdCompra(), horaFinal, dto.getMonto(), fechaFinal, dto.getIdPareja(),
+		int siguienteId = compraRepository.obtenerSiguienteId();
+		compraRepository.crearCompra(siguienteId, horaFinal, dto.getMonto(), fechaFinal, dto.getIdPareja(),
 				dto.getIdAlmacen());
+		return siguienteId;
 	}
 
 	public ArrayList<CompraDTO> obtenerTodas() {
@@ -142,7 +144,7 @@ public class CompraService {
 		}
 
 		double excedente = monto - Math.max(cupoDisponible, 0);
-		double sobrecupoDisponible = sobrecupoRepository.obtenerValorMaximoTotalPorPareja(pareja.getIdPareja());
+		double sobrecupoDisponible = sobrecupoRepository.obtenerMontoAprobadoTotalPorPareja(pareja.getIdPareja());
 
 		if (excedente <= sobrecupoDisponible) {
 			return;

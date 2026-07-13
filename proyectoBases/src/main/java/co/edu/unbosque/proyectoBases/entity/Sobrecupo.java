@@ -14,29 +14,34 @@ import jakarta.persistence.Table;
 public class Sobrecupo {
 
 	@Id
-	@GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
 	@Column(name = "id_sobrecupo")
 	private int idSobrecupo;
 
-	@Column(name = "porcentaje_sobrecupo")
-	private double porcentajeSobrecupo;
-
-	@Column(name = "valor_maximo")
-	private double valorMaximo;
+	@ManyToOne
+	@JoinColumn(name = "id_supervisor")
+	private Supervisor supervisor;
 
 	@ManyToOne
 	@JoinColumn(name = "id_pareja")
 	private Pareja pareja;
 
+	@Column(name = "estado_sobrecupo")
+	private String estadoSobrecupo;
+
+	@Column(name = "monto_sobrecupo")
+	private double montoSobrecupo;
+
 	public Sobrecupo() {
 	}
 
-	public Sobrecupo(int idSobrecupo, double porcentajeSobrecupo, double valorMaximo, Pareja pareja) {
+	public Sobrecupo(int idSobrecupo, Supervisor supervisor, Pareja pareja, String estadoSobrecupo,
+			double montoSobrecupo) {
 		super();
 		this.idSobrecupo = idSobrecupo;
-		this.porcentajeSobrecupo = porcentajeSobrecupo;
-		this.valorMaximo = valorMaximo;
+		this.supervisor = supervisor;
 		this.pareja = pareja;
+		this.estadoSobrecupo = estadoSobrecupo;
+		this.montoSobrecupo = montoSobrecupo;
 	}
 
 	public int getIdSobrecupo() {
@@ -47,20 +52,12 @@ public class Sobrecupo {
 		this.idSobrecupo = idSobrecupo;
 	}
 
-	public double getPorcentajeSobrecupo() {
-		return porcentajeSobrecupo;
+	public Supervisor getSupervisor() {
+		return supervisor;
 	}
 
-	public void setPorcentajeSobrecupo(double porcentajeSobrecupo) {
-		this.porcentajeSobrecupo = porcentajeSobrecupo;
-	}
-
-	public double getValorMaximo() {
-		return valorMaximo;
-	}
-
-	public void setValorMaximo(double valorMaximo) {
-		this.valorMaximo = valorMaximo;
+	public void setSupervisor(Supervisor supervisor) {
+		this.supervisor = supervisor;
 	}
 
 	public Pareja getPareja() {
@@ -71,9 +68,25 @@ public class Sobrecupo {
 		this.pareja = pareja;
 	}
 
+	public String getEstadoSobrecupo() {
+		return estadoSobrecupo;
+	}
+
+	public void setEstadoSobrecupo(String estadoSobrecupo) {
+		this.estadoSobrecupo = estadoSobrecupo;
+	}
+
+	public double getMontoSobrecupo() {
+		return montoSobrecupo;
+	}
+
+	public void setMontoSobrecupo(double montoSobrecupo) {
+		this.montoSobrecupo = montoSobrecupo;
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(idSobrecupo, pareja, porcentajeSobrecupo, valorMaximo);
+		return Objects.hash(estadoSobrecupo, idSobrecupo, montoSobrecupo, pareja, supervisor);
 	}
 
 	@Override
@@ -85,8 +98,8 @@ public class Sobrecupo {
 		if (getClass() != obj.getClass())
 			return false;
 		Sobrecupo other = (Sobrecupo) obj;
-		return idSobrecupo == other.idSobrecupo && Objects.equals(pareja, other.pareja)
-				&& Double.doubleToLongBits(porcentajeSobrecupo) == Double.doubleToLongBits(other.porcentajeSobrecupo)
-				&& Double.doubleToLongBits(valorMaximo) == Double.doubleToLongBits(other.valorMaximo);
+		return Objects.equals(estadoSobrecupo, other.estadoSobrecupo) && idSobrecupo == other.idSobrecupo
+				&& Double.doubleToLongBits(montoSobrecupo) == Double.doubleToLongBits(other.montoSobrecupo)
+				&& Objects.equals(pareja, other.pareja) && Objects.equals(supervisor, other.supervisor);
 	}
 }
