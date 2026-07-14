@@ -11,22 +11,19 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface SupervisorParejaRepository extends JpaRepository<SupervisorPareja, Integer> {
 
-	@Query(value = "SELECT * FROM SUPERVISORPAREJA WHERE id_supervisor_pareja = ?1", nativeQuery = true)
-	SupervisorPareja obtenerPorId(int idSupervisorPareja);
+	@Query(value = "SELECT * FROM Supervisor_Pareja WHERE id_pareja = ?1", nativeQuery = true)
+	SupervisorPareja obtenerPorPareja(int idPareja);
 
-	@Query(value = "SELECT * FROM SUPERVISORPAREJA WHERE id_supervisor = ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM Supervisor_Pareja WHERE id_supervisor = ?1", nativeQuery = true)
 	ArrayList<SupervisorPareja> obtenerPorSupervisor(int idSupervisor);
 
 	@Modifying
 	@Transactional
-	@Query(value = """
-			INSERT INTO SUPERVISORPAREJA (id_supervisor_pareja, id_supervisor, id_pareja) 
-			VALUES (?1, ?2, ?3)
-			""", nativeQuery = true)
-	void crearSupervisorPareja(int id, int idSupervisor, int idPareja);
+	@Query(value = "INSERT INTO Supervisor_Pareja (id_supervisor, id_pareja) VALUES (?1, ?2)", nativeQuery = true)
+	void crearSupervisorPareja(int idSupervisor, int idPareja);
 
 	@Modifying
 	@Transactional
-	@Query(value = "DELETE FROM SUPERVISORPAREJA WHERE id_supervisor_pareja = ?1", nativeQuery = true)
-	void eliminarSupervisorPareja(int idSupervisorPareja);
+	@Query(value = "DELETE FROM Supervisor_Pareja WHERE id_pareja = ?1", nativeQuery = true)
+	void eliminarSupervisorPareja(int idPareja);
 }

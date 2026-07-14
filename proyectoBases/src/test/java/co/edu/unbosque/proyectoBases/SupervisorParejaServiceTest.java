@@ -26,39 +26,45 @@ public class SupervisorParejaServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-
 		supervisorParejaRepository = Mockito.mock(SupervisorParejaRepository.class);
 		supervisorParejaService = new SupervisorParejaService();
 		ReflectionTestUtils.setField(supervisorParejaService, "supervisorParejaRepository", supervisorParejaRepository);
-	
 	}
 
 	@Test
 	public void crearSupervisorPareja() {
-
 		SupervisorParejaDTO dto = new SupervisorParejaDTO();
-		dto.setIdSupervisorPareja(1);
 		dto.setIdSupervisor(2);
 		dto.setIdPareja(3);
 
+		when(supervisorParejaRepository.obtenerPorPareja(3)).thenReturn(null);
+
 		supervisorParejaService.crear(dto);
 
-		verify(supervisorParejaRepository, times(1)).crearSupervisorPareja(1, 2, 3);
+		verify(supervisorParejaRepository, times(1)).crearSupervisorPareja(2, 3);
+	}
+
+	@Test
+	public void crearSupervisorPareja_DeberiaLanzarExcepcionSiLaParejaYaTieneSupervisor() {
+		SupervisorParejaDTO dto = new SupervisorParejaDTO();
+		dto.setIdSupervisor(2);
+		dto.setIdPareja(3);
+
+		when(supervisorParejaRepository.obtenerPorPareja(3)).thenReturn(new SupervisorPareja());
+
+		assertThrows(RecursoNoExistenteException.class, () -> supervisorParejaService.crear(dto));
+
+		verify(supervisorParejaRepository, never()).crearSupervisorPareja(anyInt(), anyInt());
 	}
 
 	@Test
 	public void obtenerTodas() {
-
 		Supervisor supervisor = new Supervisor();
 		supervisor.setIdSupervisor(2);
 
-		Pareja pareja = new Pareja();
-		pareja.setIdPareja(5);
-
 		SupervisorPareja entidad = new SupervisorPareja();
-		entidad.setIdSupervisorPareja(1);
+		entidad.setIdPareja(5);
 		entidad.setSupervisor(supervisor);
-		entidad.setPareja(pareja);
 
 		ArrayList<SupervisorPareja> lista = new ArrayList<>();
 		lista.add(entidad);
@@ -68,63 +74,49 @@ public class SupervisorParejaServiceTest {
 		ArrayList<SupervisorParejaDTO> resultado = supervisorParejaService.obtenerTodas();
 
 		assertEquals(1, resultado.size());
-		assertEquals(1, resultado.get(0).getIdSupervisorPareja());
 		assertEquals(2, resultado.get(0).getIdSupervisor());
 		assertEquals(5, resultado.get(0).getIdPareja());
 	}
 
 	@Test
 	public void obtenerTodas_SinDatos() {
-
 		when(supervisorParejaRepository.findAll()).thenReturn(new ArrayList<>());
 
 		assertThrows(RecursoSinDatosException.class, () -> supervisorParejaService.obtenerTodas());
 	}
 
 	@Test
-	public void obtenerPorId() {
-
+	public void obtenerPorPareja() {
 		Supervisor supervisor = new Supervisor();
 		supervisor.setIdSupervisor(8);
 
-		Pareja pareja = new Pareja();
-		pareja.setIdPareja(10);
-
 		SupervisorPareja entidad = new SupervisorPareja();
-		entidad.setIdSupervisorPareja(4);
+		entidad.setIdPareja(10);
 		entidad.setSupervisor(supervisor);
-		entidad.setPareja(pareja);
 
-		when(supervisorParejaRepository.obtenerPorId(4)).thenReturn(entidad);
+		when(supervisorParejaRepository.obtenerPorPareja(10)).thenReturn(entidad);
 
-		SupervisorParejaDTO dto = supervisorParejaService.obtenerPorId(4);
+		SupervisorParejaDTO dto = supervisorParejaService.obtenerPorPareja(10);
 
-		assertEquals(4, dto.getIdSupervisorPareja());
 		assertEquals(8, dto.getIdSupervisor());
 		assertEquals(10, dto.getIdPareja());
 	}
 
 	@Test
-	public void obtenerPorId_NoExiste() {
+	public void obtenerPorPareja_NoExiste() {
+		when(supervisorParejaRepository.obtenerPorPareja(100)).thenReturn(null);
 
-		when(supervisorParejaRepository.obtenerPorId(100)).thenReturn(null);
-
-		assertThrows(RecursoNoExistenteException.class, () -> supervisorParejaService.obtenerPorId(100));
+		assertThrows(RecursoNoExistenteException.class, () -> supervisorParejaService.obtenerPorPareja(100));
 	}
 
 	@Test
 	public void obtenerPorSupervisor() {
-
 		Supervisor supervisor = new Supervisor();
 		supervisor.setIdSupervisor(7);
 
-		Pareja pareja = new Pareja();
-		pareja.setIdPareja(15);
-
 		SupervisorPareja entidad = new SupervisorPareja();
-		entidad.setIdSupervisorPareja(20);
+		entidad.setIdPareja(15);
 		entidad.setSupervisor(supervisor);
-		entidad.setPareja(pareja);
 
 		ArrayList<SupervisorPareja> lista = new ArrayList<>();
 		lista.add(entidad);
@@ -134,14 +126,12 @@ public class SupervisorParejaServiceTest {
 		ArrayList<SupervisorParejaDTO> resultado = supervisorParejaService.obtenerPorSupervisor(7);
 
 		assertEquals(1, resultado.size());
-		assertEquals(20, resultado.get(0).getIdSupervisorPareja());
 		assertEquals(7, resultado.get(0).getIdSupervisor());
 		assertEquals(15, resultado.get(0).getIdPareja());
 	}
 
 	@Test
 	public void obtenerPorSupervisor_SinDatos() {
-
 		when(supervisorParejaRepository.obtenerPorSupervisor(7)).thenReturn(new ArrayList<>());
 
 		assertThrows(RecursoSinDatosException.class, () -> supervisorParejaService.obtenerPorSupervisor(7));
@@ -149,23 +139,20 @@ public class SupervisorParejaServiceTest {
 
 	@Test
 	public void eliminarSupervisorPareja() {
-
 		SupervisorPareja entidad = new SupervisorPareja();
-		entidad.setIdSupervisorPareja(1);
+		entidad.setIdPareja(3);
 
-		when(supervisorParejaRepository.obtenerPorId(1)).thenReturn(entidad);
+		when(supervisorParejaRepository.obtenerPorPareja(3)).thenReturn(entidad);
 
-		supervisorParejaService.eliminar(1);
+		supervisorParejaService.eliminar(3);
 
-		verify(supervisorParejaRepository, times(1)).eliminarSupervisorPareja(1);
+		verify(supervisorParejaRepository, times(1)).eliminarSupervisorPareja(3);
 	}
 
 	@Test
 	public void eliminarSupervisorPareja_NoExiste() {
+		when(supervisorParejaRepository.obtenerPorPareja(3)).thenReturn(null);
 
-		when(supervisorParejaRepository.obtenerPorId(1)).thenReturn(null);
-
-		assertThrows(RecursoNoExistenteException.class, () -> supervisorParejaService.eliminar(1));
+		assertThrows(RecursoNoExistenteException.class, () -> supervisorParejaService.eliminar(3));
 	}
-
 }

@@ -41,8 +41,8 @@ public class SupervisorParejaController {
 	}
 
 	@GetMapping(path = { "/ObtenerSupervisorPareja" })
-	public ResponseEntity<SupervisorParejaDTO> obtenerSupervisorPareja(@RequestParam int idSupervisorPareja) {
-		return ResponseEntity.ok(supervisorParejaService.obtenerPorId(idSupervisorPareja));
+	public ResponseEntity<SupervisorParejaDTO> obtenerSupervisorPareja(@RequestParam int idPareja) {
+		return ResponseEntity.ok(supervisorParejaService.obtenerPorPareja(idPareja));
 	}
 
 	@GetMapping(path = { "/ObtenerPorSupervisor" })
@@ -51,8 +51,8 @@ public class SupervisorParejaController {
 	}
 
 	@DeleteMapping(path = { "/BorrarSupervisorPareja" })
-	public ResponseEntity<Map<String, Object>> borrarSupervisorPareja(@RequestParam int idSupervisorPareja) {
-		supervisorParejaService.eliminar(idSupervisorPareja);
+	public ResponseEntity<Map<String, Object>> borrarSupervisorPareja(@RequestParam int idPareja) {
+		supervisorParejaService.eliminar(idPareja);
 		Map<String, Object> body = new HashMap<>();
 		body.put("message", "Asignación eliminada con éxito");
 		body.put("status", HttpStatus.OK.value());

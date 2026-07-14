@@ -17,14 +17,16 @@ public class SupervisorParejaService {
 	private SupervisorParejaRepository supervisorParejaRepository;
 
 	public void crear(SupervisorParejaDTO dto) {
-		supervisorParejaRepository.crearSupervisorPareja(dto.getIdSupervisorPareja(), dto.getIdSupervisor(),
-				dto.getIdPareja());
+		if (supervisorParejaRepository.obtenerPorPareja(dto.getIdPareja()) != null) {
+			throw new RecursoNoExistenteException("Esa pareja ya tiene un supervisor asignado");
+		}
+		supervisorParejaRepository.crearSupervisorPareja(dto.getIdSupervisor(), dto.getIdPareja());
 	}
 
 	public ArrayList<SupervisorParejaDTO> obtenerTodas() {
 		List<SupervisorPareja> entidades = supervisorParejaRepository.findAll();
 		if (entidades == null || entidades.isEmpty()) {
-			throw new RecursoSinDatosException("No hay asignaciones de supervisor-pareja ");
+			throw new RecursoSinDatosException("No hay asignaciones de supervisor-pareja");
 		}
 		ArrayList<SupervisorParejaDTO> resultado = new ArrayList<>();
 		for (SupervisorPareja sp : entidades) {
@@ -33,10 +35,10 @@ public class SupervisorParejaService {
 		return resultado;
 	}
 
-	public SupervisorParejaDTO obtenerPorId(int idSupervisorPareja) {
-		SupervisorPareja entidad = supervisorParejaRepository.obtenerPorId(idSupervisorPareja);
+	public SupervisorParejaDTO obtenerPorPareja(int idPareja) {
+		SupervisorPareja entidad = supervisorParejaRepository.obtenerPorPareja(idPareja);
 		if (entidad == null) {
-			throw new RecursoNoExistenteException("No existe la asignacion con ese id");
+			throw new RecursoNoExistenteException("Esa pareja no tiene supervisor asignado");
 		}
 		return mapear(entidad);
 	}
@@ -53,21 +55,18 @@ public class SupervisorParejaService {
 		return resultado;
 	}
 
-	public void eliminar(int idSupervisorPareja) {
-		if (supervisorParejaRepository.obtenerPorId(idSupervisorPareja) == null) {
-			throw new RecursoNoExistenteException("No existe con ese id");
+	public void eliminar(int idPareja) {
+		if (supervisorParejaRepository.obtenerPorPareja(idPareja) == null) {
+			throw new RecursoNoExistenteException("Esa pareja no tiene supervisor asignado");
 		}
-		supervisorParejaRepository.eliminarSupervisorPareja(idSupervisorPareja);
+		supervisorParejaRepository.eliminarSupervisorPareja(idPareja);
 	}
 
 	private SupervisorParejaDTO mapear(SupervisorPareja sp) {
 		SupervisorParejaDTO dto = new SupervisorParejaDTO();
-		dto.setIdSupervisorPareja(sp.getIdSupervisorPareja());
+		dto.setIdPareja(sp.getIdPareja());
 		if (sp.getSupervisor() != null) {
 			dto.setIdSupervisor(sp.getSupervisor().getIdSupervisor());
-		}
-		if (sp.getPareja() != null) {
-			dto.setIdPareja(sp.getPareja().getIdPareja());
 		}
 		return dto;
 	}

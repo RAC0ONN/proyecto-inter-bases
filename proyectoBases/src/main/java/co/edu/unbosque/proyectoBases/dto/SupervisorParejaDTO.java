@@ -4,26 +4,16 @@ import java.util.Objects;
 
 public class SupervisorParejaDTO {
 
-	private int idSupervisorPareja;
 	private int idSupervisor;
 	private int idPareja;
-
+	
 	public SupervisorParejaDTO() {
 	}
 
-	public SupervisorParejaDTO(int idSupervisorPareja, int idSupervisor, int idPareja) {
+	public SupervisorParejaDTO(int idSupervisor, int idPareja) {
 		super();
-		this.idSupervisorPareja = idSupervisorPareja;
 		this.idSupervisor = idSupervisor;
 		this.idPareja = idPareja;
-	}
-
-	public int getIdSupervisorPareja() {
-		return idSupervisorPareja;
-	}
-
-	public void setIdSupervisorPareja(int idSupervisorPareja) {
-		this.idSupervisorPareja = idSupervisorPareja;
 	}
 
 	public int getIdSupervisor() {
@@ -44,7 +34,7 @@ public class SupervisorParejaDTO {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(idPareja, idSupervisor, idSupervisorPareja);
+		return Objects.hash(idPareja, idSupervisor);
 	}
 
 	@Override
@@ -56,8 +46,7 @@ public class SupervisorParejaDTO {
 		if (getClass() != obj.getClass())
 			return false;
 		SupervisorParejaDTO other = (SupervisorParejaDTO) obj;
-		return idPareja == other.idPareja && idSupervisor == other.idSupervisor
-				&& idSupervisorPareja == other.idSupervisorPareja;
+		return idPareja == other.idPareja && idSupervisor == other.idSupervisor;
 	}
 
 }
