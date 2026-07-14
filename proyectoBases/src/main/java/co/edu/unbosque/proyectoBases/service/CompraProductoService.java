@@ -17,7 +17,7 @@ public class CompraProductoService {
 	private CompraProductoRepository compraProductoRepository;
 
 	public void crear(CompraProductoDTO dto) {
-		compraProductoRepository.crearCompraProducto(dto.getIdCompraProducto(), dto.getIdCompra(), dto.getIdProducto());
+			compraProductoRepository.crearCompraProducto(dto.getIdCompra(), dto.getIdProducto());
 	}
 
 	public ArrayList<CompraProductoDTO> obtenerTodas() {

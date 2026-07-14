@@ -20,11 +20,14 @@ public interface CompraProductoRepository extends JpaRepository<CompraProducto, 
 	@Modifying
 	@Transactional
 	@Query(value = """
-			INSERT INTO COMPRA_PRODUCTO (id_compra_producto, id_compra, id_producto)
-			VALUES (?1, ?2, ?3)
+			INSERT INTO COMPRA_PRODUCTO (id_compra, id_producto)
+			VALUES (?1, ?2)
 			""", nativeQuery = true)
-	void crearCompraProducto(int id, int idCompra, int idProducto);
-
+	void crearCompraProducto(int idCompra, int idProducto);
+	
+	@Query(value = "SELECT COALESCE(MAX(id_compra_producto), 0) + 1 FROM COMPRA_PRODUCTO", nativeQuery = true)
+	int obtenerSiguienteId();
+	
 	@Modifying
 	@Transactional
 	@Query(value = "DELETE FROM COMPRA_PRODUCTO WHERE id_compra_producto = ?1", nativeQuery = true)

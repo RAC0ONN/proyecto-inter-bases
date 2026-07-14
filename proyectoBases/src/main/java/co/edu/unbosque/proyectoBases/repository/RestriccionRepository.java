@@ -35,4 +35,5 @@ public interface RestriccionRepository extends JpaRepository<Restriccion, Intege
 	@Transactional
 	@Query(value = "DELETE FROM RESTRICCION WHERE id_restriccion = ?1", nativeQuery = true)
 	void eliminarRestriccion(int idRestriccion);
-}
+	@Query(value = "SELECT COALESCE(MAX(id_restriccion), 0) + 1 FROM RESTRICCION", nativeQuery = true)
+	int obtenerSiguienteId();}

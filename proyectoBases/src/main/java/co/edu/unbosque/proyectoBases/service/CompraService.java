@@ -1,3 +1,5 @@
+
+
 package co.edu.unbosque.proyectoBases.service;
 
 import java.time.DayOfWeek;
@@ -10,6 +12,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; 
+
 import co.edu.unbosque.proyectoBases.dto.CompraDTO;
 import co.edu.unbosque.proyectoBases.entity.Almacen;
 import co.edu.unbosque.proyectoBases.entity.Compra;
@@ -47,38 +51,24 @@ public class CompraService {
 			DayOfWeek.WEDNESDAY, "MIERCOLES", DayOfWeek.THURSDAY, "JUEVES", DayOfWeek.FRIDAY, "VIERNES",
 			DayOfWeek.SATURDAY, "SABADO", DayOfWeek.SUNDAY, "DOMINGO");
 
+	@Transactional 
 	public int crear(CompraDTO dto) {
-		Pareja pareja = parejaRepository.obtenerPorId(dto.getIdPareja());
-		if (pareja == null) {
-			throw new RecursoNoExistenteException("No existe una pareja con ese id, no se puede registrar la compra");
-		}
+	       Pareja pareja = parejaRepository.obtenerPorId(dto.getIdPareja());
+	    if (pareja == null) {
+	        throw new RecursoNoExistenteException("No existe la pareja.");
+	    }
 
-		Almacen almacen = almacenRepository.obtenerPorId(dto.getIdAlmacen());
-		if (almacen == null) {
-			throw new RecursoNoExistenteException("No existe un almacén con ese id, no se puede registrar la compra");
-		}
+	       if (pareja.getCupoAsignado() < dto.getMonto()) {
+	        throw new RuntimeException("No tiene suficiente cupo.");
+	    }
 
-		LocalDate fechaFinal = (dto.getFecha() != null) ? dto.getFecha() : LocalDate.now();
-		LocalTime horaFinal = (dto.getHora() != null) ? dto.getHora() : LocalTime.now();
-
-		validarRestriccionHoraria(dto.getIdPareja(), fechaFinal, horaFinal);
-		validarCupoDisponible(pareja, dto.getMonto());
-
-		int siguienteId = compraRepository.obtenerSiguienteId();
-		compraRepository.crearCompra(siguienteId, horaFinal, dto.getMonto(), fechaFinal, dto.getIdPareja(),
-				dto.getIdAlmacen());
-		return siguienteId;
-	}
-
-	public ArrayList<CompraDTO> obtenerPorPareja(int idPareja) {
-		List<Compra> entidades = compraRepository.obtenerPorPareja(idPareja);
-		ArrayList<CompraDTO> resultado = new ArrayList<>();
-		if (entidades != null) {
-			for (Compra c : entidades) {
-				resultado.add(mapear(c));
-			}
-		}
-		return resultado;
+	     LocalDate fechaFinal = (dto.getFecha() != null) ? dto.getFecha() : LocalDate.now();
+	    LocalTime horaFinal = (dto.getHora() != null) ? dto.getHora() : LocalTime.now();
+	    compraRepository.crearCompra(horaFinal, dto.getMonto(), fechaFinal, dto.getIdPareja(), dto.getIdAlmacen());
+	    
+	    parejaRepository.descontarCupo(dto.getIdPareja(), dto.getMonto());
+	    
+	    return compraRepository.obtenerSiguienteId() - 1;
 	}
 
 	public ArrayList<CompraDTO> obtenerTodas() {
@@ -101,6 +91,7 @@ public class CompraService {
 		return mapear(entidad);
 	}
 
+	@Transactional 
 	public void eliminar(int idCompra) {
 		if (compraRepository.obtenerPorId(idCompra) == null) {
 			throw new RecursoNoExistenteException("No existe una compra con ese id");
@@ -161,9 +152,19 @@ public class CompraService {
 			return;
 		}
 
-		throw new RecursoCupoInsuficienteException(String.format(
-				"La compra no puede realizarse porque el cupo disponible es de %.2f y el sobrecupo disponible es de %.2f. El valor de la compra es %.2f.",
-				Math.max(cupoDisponible, 0), sobrecupoDisponible, monto));
+		throw new RecursoCupoInsuficienteException(
+				String.format("La compra no puede realizarse porque el cupo disponible es de %.2f y el sobrecupo disponible es de %.2f.",
+						Math.max(cupoDisponible, 0), sobrecupoDisponible, monto));
 	}
-
+	public List<CompraDTO> obtenerPorPareja(int idPareja) {
+	      List<Compra> entidades = compraRepository.obtenerPorPareja(idPareja);
+	    
+	     List<CompraDTO> resultado = new ArrayList<>();
+	    if (entidades != null) {
+	        for (Compra c : entidades) {
+	            resultado.add(mapear(c));
+	        }
+	    }
+	    return resultado;
+	}
 }

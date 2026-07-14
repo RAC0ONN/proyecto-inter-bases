@@ -33,10 +33,10 @@ public interface CompraRepository extends JpaRepository<Compra, Integer> {
 	@Modifying
 	@Transactional
 	@Query(value = """
-			INSERT INTO COMPRA (id_compra, hora, monto, fecha, id_pareja, id_almacen)
-			VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+			INSERT INTO COMPRA ( hora, monto, fecha, id_pareja, id_almacen)
+			VALUES (?1, ?2, ?3, ?4, ?5)
 			""", nativeQuery = true)
-	void crearCompra(int id, LocalTime hora, double monto, LocalDate fecha, int idPareja, int idAlmacen);
+	void crearCompra(LocalTime hora, double monto, LocalDate fecha, int idPareja, int idAlmacen);
 
 	@Modifying
 	@Transactional

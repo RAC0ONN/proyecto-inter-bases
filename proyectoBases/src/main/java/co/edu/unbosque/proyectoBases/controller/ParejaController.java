@@ -50,6 +50,8 @@ public class ParejaController {
 		return ResponseEntity.ok(parejaService.obtenerTodas());
 	}
 
+	
+	
 	@GetMapping(path = { "/ObtenerPareja" })
 	public ResponseEntity<ParejaDTO> obtenerPareja(@RequestParam int idPareja) {
 		return ResponseEntity.ok(parejaService.obtenerPorId(idPareja));

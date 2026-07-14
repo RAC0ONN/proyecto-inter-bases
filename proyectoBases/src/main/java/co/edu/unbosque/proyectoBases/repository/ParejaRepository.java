@@ -51,4 +51,10 @@ public interface ParejaRepository extends JpaRepository<Pareja, Integer> {
 	@Transactional
 	@Query(value = "DELETE FROM PAREJA WHERE id_pareja = ?1", nativeQuery = true)
 	void eliminarPareja(int idPareja);
+	
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE PAREJA SET cupo_asignado = cupo_asignado - ?2 WHERE id_pareja = ?1", nativeQuery = true)
+	void descontarCupo(int idPareja, double monto);
+	
 }
