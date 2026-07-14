@@ -4,6 +4,7 @@ import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -14,18 +15,19 @@ import jakarta.persistence.Table;
 public class Sobrecupo {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_sobrecupo")
 	private int idSobrecupo;
 
 	@ManyToOne
-	@JoinColumn(name = "id_supervisor")
+	@JoinColumn(name = "id_supervisor", nullable = false) // Hibernate usará este nombre para crear la columna
 	private Supervisor supervisor;
 
 	@ManyToOne
-	@JoinColumn(name = "id_pareja")
+	@JoinColumn(name = "id_pareja", nullable = false)
 	private Pareja pareja;
 
-	@Column(name = "estado_sobrecupo")
+	@Column(name = "estado_sobrecupo", length = 50)
 	private String estadoSobrecupo;
 
 	@Column(name = "monto_sobrecupo")
@@ -102,4 +104,5 @@ public class Sobrecupo {
 				&& Double.doubleToLongBits(montoSobrecupo) == Double.doubleToLongBits(other.montoSobrecupo)
 				&& Objects.equals(pareja, other.pareja) && Objects.equals(supervisor, other.supervisor);
 	}
+
 }

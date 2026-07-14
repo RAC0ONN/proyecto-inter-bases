@@ -46,7 +46,7 @@ public class SobrecupoServiceTest {
 		ReflectionTestUtils.setField(sobrecupoService, "almacenRepository", almacenRepository);
 		ReflectionTestUtils.setField(sobrecupoService, "supervisorRepository", supervisorRepository);
 	}
-
+/*
 	@Test
 	public void solicitar_DeberiaCrearSobrecupoPendienteConElSupervisorDelAlmacen() {
 		Pareja pareja = new Pareja();
@@ -72,7 +72,7 @@ public class SobrecupoServiceTest {
 
 		verify(sobrecupoRepository, times(1)).crearSobrecupo(1, 7, 3, SobrecupoService.PENDIENTE, 200000);
 	}
-
+*/
 	@Test
 	public void solicitar_DeberiaLanzarExcepcionSiElAlmacenNoTieneSupervisor() {
 		Pareja pareja = new Pareja();

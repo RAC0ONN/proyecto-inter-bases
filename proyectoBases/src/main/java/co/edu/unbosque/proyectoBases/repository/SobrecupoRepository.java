@@ -35,13 +35,12 @@ public interface SobrecupoRepository extends JpaRepository<Sobrecupo, Integer> {
 	int obtenerSiguienteId();
 
 	@Modifying
-	@Transactional
-	@Query(value = """
-			INSERT INTO SOBRECUPO (id_sobrecupo, id_supervisor, id_pareja, estado_sobrecupo, monto_sobrecupo)
-			VALUES (?1, ?2, ?3, ?4, ?5)
-			""", nativeQuery = true)
-	void crearSobrecupo(int id, int idSupervisor, int idPareja, String estadoSobrecupo, double montoSobrecupo);
-
+    @Transactional
+    @Query(value = """
+            INSERT INTO SOBRECUPO (id_supervisor, id_pareja, estado_sobrecupo, monto_sobrecupo)
+            VALUES (?1, ?2, ?3, ?4)
+            """, nativeQuery = true)
+    void crearSobrecupo(int idSupervisor, int idPareja, String estadoSobrecupo, double montoSobrecupo);
 	@Modifying
 	@Transactional
 	@Query(value = "DELETE FROM SOBRECUPO WHERE id_sobrecupo = ?1", nativeQuery = true)

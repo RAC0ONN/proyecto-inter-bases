@@ -48,28 +48,18 @@ public class SobrecupoService {
 	
 	
 	public void solicitar(SobrecupoDTO dto) {
-		Pareja pareja = parejaRepository.obtenerPorId(dto.getIdPareja());
-		if (pareja == null) {
-			throw new RecursoNoExistenteException("No existe una pareja con ese id");
-		}
+	   
+	    Optional<Supervisor> supervisor = supervisorRepository.obtenerPorAlmacen(dto.getIdAlmacen());
+	    if (supervisor.isEmpty()) {
+	        throw new RecursoNoExistenteException("El almacén seleccionado no tiene un supervisor asignado");
+	    }
 
-		Almacen almacen = almacenRepository.obtenerPorId(dto.getIdAlmacen());
-		if (almacen == null) {
-			throw new RecursoNoExistenteException("No existe un almacén con ese id");
-		}
-
-		if (dto.getMontoSobrecupo() <= 0) {
-			throw new RecursoNoExistenteException("El monto solicitado debe ser mayor a cero");
-		}
-
-		Optional<Supervisor> supervisor = supervisorRepository.obtenerPorAlmacen(dto.getIdAlmacen());
-		if (supervisor.isEmpty()) {
-			throw new RecursoNoExistenteException("El almacén seleccionado no tiene un supervisor asignado");
-		}
-
-		int siguienteId = sobrecupoRepository.obtenerSiguienteId();
-		sobrecupoRepository.crearSobrecupo(siguienteId, supervisor.get().getIdSupervisor(), dto.getIdPareja(),
-				PENDIENTE, dto.getMontoSobrecupo());
+	      sobrecupoRepository.crearSobrecupo(
+	        supervisor.get().getIdSupervisor(), 
+	        dto.getIdPareja(),
+	        PENDIENTE, 
+	        dto.getMontoSobrecupo()
+	    );
 	}
 	
 	public void escalarACliente(int idSobrecupo, boolean escalar) {

@@ -17,7 +17,7 @@ public class RestriccionService {
 	private RestriccionRepository restriccionRepository;
 
 	public void crear(RestriccionDTO dto) {
-	    int nuevoId = restriccionRepository.obtenerSiguienteId(); // Genera el ID automáticamente
+	    int nuevoId = restriccionRepository.obtenerSiguienteId(); 
 	    restriccionRepository.crearRestriccion(nuevoId, dto.getDiaSemana(), dto.getHoraInicio(),
 	            dto.getHoraFin(), dto.getIdPareja());
 	}
